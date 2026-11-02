@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopSphere | Smart Retail & Inventory Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #0b0f19;
+            --bg-secondary: #111827;
+            --bg-card: #1f2937;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-emerald: #10b981;
+            --accent-purple: #8b5cf6;
+            --accent-amber: #f59e0b;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-color: #374151;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* Login Overlay Screen */
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(11, 15, 25, 0.95);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 2.5rem;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        .login-card h2 {
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, #3b82f6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 1.75rem;
+        }
+
+        .login-card p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .login-input-group {
+            margin-bottom: 1.25rem;
+            text-align: left;
+        }
+
+        .login-input-group label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+        }
+
+        .login-input {
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            border-radius: 8px;
+            color: var(--text-main);
+            font-size: 0.9rem;
+        }
+
+        /* App Layout (Hidden until login) */
+        #app-container {
+            display: none;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        .main-layout {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        aside {
+            width: 280px;
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1.5rem;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .logo-area i {
+            font-size: 1.8rem;
+            color: var(--accent-cyan);
+        }
+
+        .logo-area h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #3b82f6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex-grow: 1;
+        }
+
+        .nav-links li a {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            padding: 0.85rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-links li.active a, .nav-links li a:hover {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(6, 182, 212, 0.15));
+            color: var(--accent-cyan);
+            border-left: 4px solid var(--accent-cyan);
+        }
+
+        /* Main Content Container */
+        main {
+            flex-grow: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+
+        .header-title h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .header-title p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .user-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: var(--bg-card);
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            border: 1px solid var(--border-color);
+            font-size: 0.85rem;
+        }
+
+        /* Metrics Cards */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
+
+        .card.blue::after { background-color: var(--accent-blue); }
+        .card.cyan::after { background-color: var(--accent-cyan); }
+        .card.emerald::after { background-color: var(--accent-emerald); }
+        .card.purple::after { background-color: var(--accent-purple); }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-header span {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .card-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        /* Tabs & Panels */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .panel {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.875rem;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 600;
+            background-color: rgba(17, 24, 39, 0.4);
+        }
+
+        td[contenteditable="true"] {
+            background-color: rgba(59, 130, 246, 0.1);
+            border-radius: 4px;
+            cursor: text;
+        }
+
+        .badge {
+            padding: 0.25rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge.regular { background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); }
+        .badge.premium { background: rgba(139, 92, 246, 0.15); color: var(--accent-purple); }
+
+        /* Form Controls */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.3rem;
+        }
+
+        .form-control {
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 0.6rem;
+            border-radius: 6px;
+            color: var(--text-main);
+            font-size: 0.85rem;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover { opacity: 0.9; }
+
+        .warehouse-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CREATIVE LOGIN OVERLAY -->
+    <div id="login-overlay">
+        <div class="login-card">
+            <h2>ShopSphere Portal</h2>
+            <p>Sign in to access your retail inventory & dynamic tier discounts</p>
+            <div class="login-input-group">
+                <label>Customer Name</label>
+                <input type="text" id="login-name" class="login-input" placeholder="e.g. S. Monika Sai" value="S. Monika Sai">
+            </div>
+            <div class="login-input-group">
+                <label>Membership Tier</label>
+                <select id="login-tier" class="login-input">
+                    <option value="Regular">Regular Member (10% Base Discount)</option>
+                    <option value="Premium" selected>Premium Member (20% VIP Discount)</option>
+                </select>
+            </div>
+            <button class="btn" style="width: 100%; margin-top: 0.5rem;" onclick="handleLogin()">Launch Dashboard <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="app-container">
+        <div class="main-layout">
+            <!-- Sidebar Navigation -->
+            <aside>
+                <div>
+                    <div class="logo-area">
+                        <i class="fa-solid fa-cube"></i>
+                        <h1>ShopSphere</h1>
+                    </div>
+                    <ul class="nav-links">
+                        <li class="active" onclick="switchTab(event, 'overview')"><a href="#"><i class="fa-solid fa-chart-pie"></i> Overview</a></li>
+                        <li onclick="switchTab(event, 'products')"><a href="#"><i class="fa-solid fa-box-open"></i> Products & Stock</a></li>
+                        <li onclick="switchTab(event, 'warehouses')"><a href="#"><i class="fa-solid fa-warehouse"></i> Warehouses</a></li>
+                        <li onclick="switchTab(event, 'customers')"><a href="#"><i class="fa-solid fa-users"></i> Customers (Reg/Prem)</a></li>
+                        <li onclick="switchTab(event, 'billing')"><a href="#"><i class="fa-solid fa-file-invoice-dollar"></i> Billing & GST</a></li>
+                        <li onclick="switchTab(event, 'reports')"><a href="#"><i class="fa-solid fa-chart-line"></i> Sales Reports</a></li>
+                    </ul>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main>
+                <header>
+                    <div class="header-title">
+                        <h2 id="page-title">Executive Inventory Dashboard</h2>
+                        <p id="page-subtitle">Smart Retail & Inventory Management Platform</p>
+                    </div>
+                    <div class="user-pill">
+                        <i class="fa-solid fa-user-shield" style="color: var(--accent-cyan);"></i>
+                        <span id="display-user">User</span> &bull; <span id="display-tier" class="badge premium">Premium</span>
+                    </div>
+                </header>
+
+                <!-- Metrics Cards -->
+                <div class="metrics-grid">
+                    <div class="card blue">
+                        <div class="card-header">
+                            <span>Total Products</span>
+                            <i class="fa-solid fa-boxes-stacked" style="color: var(--accent-blue);"></i>
+                        </div>
+                        <div class="card-value" id="metric-products">5</div>
+                    </div>
+                    <div class="card cyan">
+                        <div class="card-header">
+                            <span>Total Inventory Stock</span>
+                            <i class="fa-solid fa-warehouse" style="color: var(--accent-cyan);"></i>
+                        </div>
+                        <div class="card-value" id="metric-stock">61,474</div>
+                    </div>
+                    <div class="card emerald">
+                        <div class="card-header">
+                            <span>Total Sales Volume</span>
+                            <i class="fa-solid fa-indian-rupee-sign" style="color: var(--accent-emerald);"></i>
+                        </div>
+                        <div class="card-value">₹50,250</div>
+                    </div>
+                    <div class="card purple">
+                        <div class="card-header">
+                            <span>Active Warehouses</span>
+                            <i class="fa-solid fa-network-wired" style="color: var(--accent-purple);"></i>
+                        </div>
+                        <div class="card-value">2 Active</div>
+                    </div>
+                </div>
+
+                <!-- TAB 1: OVERVIEW -->
+                <div id="overview" class="tab-content active">
+                    <div class="panel">
+                        <div class="panel-title">
+                            <span>Product Catalog & Dynamic Tier Discounts (Click cells to edit)</span>
+                            <button class="btn" onclick="updateMetrics()"><i class="fa-solid fa-sync"></i> Recalculate Totals</button>
+                        </div>
+                        <table id="product-table">
+                            <thead>
+                                <tr>
+                                    <th>No.</th>
+                                    <th>Product Name</th>
+                                    <th>Cost/Item (₹)</th>
+                                    <th>GST (%)</th>
+                                    <th>Tax (₹)</th>
+                                    <th>Discount (%)</th>
+                                    <th>Customer Tier</th>
+                                    <th>Stock</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1</td>
+                                    <td contenteditable="true">Alarm</td>
+                                    <td contenteditable="true">6500</td>
+                                    <td contenteditable="true">18</td>
+                                    <td>1170</td>
+                                    <td class="row-discount" contenteditable="true">10</td>
+                                    <td><span class="badge tier-badge">Regular</span></td>
+                                    <td contenteditable="true">7500</td>
+                                </tr>
+                                <tr>
+                                    <td>2</td>
+                                    <td contenteditable="true">Sensor</td>
+                                    <td contenteditable="true">7500</td>
+                                    <td contenteditable="true">18</td>
+                                    <td>1350</td>
+                                    <td class="row-discount" contenteditable="true">15</td>
+                                    <td><span class="badge tier-badge">Premium</span></td>
+                                    <td contenteditable="true">657</td>
+                                </tr>
+                                <tr>
+                                    <td>3</td>
+                                    <td contenteditable="true">Buzzer</td>
+                                    <td contenteditable="true">698</td>
+                                    <td contenteditable="true">12</td>
+                                    <td>83.76</td>
+                                    <td class="row-discount" contenteditable="true">5</td>
+                                    <td><span class="badge tier-badge">Regular</span></td>
+                                    <td contenteditable="true">632</td>
+                                </tr>
+                                <tr>
+                                    <td>4</td>
+                                    <td contenteditable="true">Pliers</td>
+                                    <td contenteditable="true">900</td>
+                                    <td contenteditable="true">12</td>
+                                    <td>108</td>
+                                    <td class="row-discount" contenteditable="true">10</td>
+                                    <td><span class="badge tier-badge">Premium</span></td>
+                                    <td contenteditable="true">6987</td>
+                                </tr>
+                                <tr>
+                                    <td>5</td>
+                                    <td contenteditable="true">Screws</td>
+                                    <td contenteditable="true">8</td>
+                                    <td contenteditable="true">5</td>
+                                    <td>0.40</td>
+                                    <td class="row-discount" contenteditable="true">2</td>
+                                    <td><span class="badge tier-badge">Regular</span></td>
+                                    <td contenteditable="true">45698</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Add Product Form Panel -->
+                    <div class="panel">
+                        <div class="panel-title"><span>Add New Product to Inventory</span></div>
+                        <div class="form-grid">
+                            <div class="form-group"><label>Product Name</label><input type="text" id="new-name" class="form-control" placeholder="e.g. Decoder"></div>
+                            <div class="form-group"><label>Cost Per Item (₹)</label><input type="number" id="new-cost" class="form-control" placeholder="1200"></div>
+                            <div class="form-group"><label>GST (%)</label><input type="number" id="new-gst" class="form-control" placeholder="18"></div>
+                            <div class="form-group"><label>Discount (%)</label><input type="number" id="new-disc" class="form-control" placeholder="10"></div>
+                            <div class="form-group"><label>Customer Tier</label>
+                                <select id="new-tier" class="form-control">
+                                    <option value="Regular">Regular</option>
+                                    <option value="Premium">Premium</option>
+                                </select>
+                            </div>
+                            <div class="form-group"><label>Stock Quantity</label><input type="number" id="new-stock" class="form-control" placeholder="500"></div>
+                        </div>
+                        <button class="btn" onclick="addProduct()"><i class="fa-solid fa-plus"></i> Add Product & Update Inventory</button>
+                    </div>
+                </div>
+
+                <!-- TAB 2: PRODUCTS & STOCK -->
+                <div id="products" class="tab-content">
+                    <div class="panel">
+                        <div class="panel-title"><span>Full Product Inventory Management</span></div>
+                        <p style="color: var(--text-muted);">Manage inventory stocks and live metrics seamlessly.</p>
+                    </div>
+                </div>
+
+                <!-- TAB 3: WAREHOUSES -->
+                <div id="warehouses" class="tab-content">
+                    <div class="panel">
+                        <div class="panel-title"><span>Warehouse Distribution Hubs</span></div>
+                        <div class="warehouse-item">
+                            <h3>Warehouse 1 (Main Hub)</h3>
+                            <p style="margin-top: 0.5rem; color: var(--text-muted);">Primary node stock distribution active.</p>
+                        </div>
+                        <div class="warehouse-item">
+                            <h3>Warehouse 2 (Secondary Hub)</h3>
+                            <p style="margin-top: 0.5rem; color: var(--text-muted);">Secondary storage nodes online.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: CUSTOMERS -->
+                <div id="customers" class="tab-content">
+                    <div class="panel">
+                        <div class="panel-title"><span>Customer Tiers & Membership Management</span></div>
+                        <p style="color: var(--text-muted);">Active session profile managed with dynamic tier privileges.</p>
+                    </div>
+                </div>
+
+                <!-- TAB 5: BILLING & GST -->
+                <div id="billing" class="tab-content">
+                    <div class="panel">
+                        <div class="panel-title"><span>Billing, GST & Tax Calculations</span></div>
+                        <p style="color: var(--text-muted);">Automated subtotal calculations with integrated GST brackets.</p>
+                    </div>
+                </div>
+
+                <!-- TAB 6: SALES REPORTS -->
+                <div id="reports" class="tab-content">
+                    <div class="panel">
+                        <div class="panel-title"><span>Sales Analytics & Reports</span></div>
+                        <p style="color: var(--text-muted);">Transaction logs and financial summaries updated.</p>
+                    </div>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <script>
+        function handleLogin() {
+            const name = document.getElementById('login-name').value || 'User';
+            const tier = document.getElementById('login-tier').value;
+
+            document.getElementById('display-user').innerText = name;
+            const tierBadge = document.getElementById('display-tier');
+            tierBadge.innerText = tier;
+            tierBadge.className = 'badge ' + tier.toLowerCase();
+
+            // Hide login overlay and show app
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('app-container').style.display = 'block';
+
+            // Dynamically adjust table discounts based on logged-in tier
+            applyDynamicDiscounts(tier);
+        }
+
+        function applyDynamicDiscounts(tier) {
+            const rows = document.querySelectorAll('#product-table tbody tr');
+            rows.forEach(row => {
+                const discountCell = row.querySelector('.row-discount');
+                const badgeCell = row.querySelector('.tier-badge');
+                
+                if(tier === 'Premium') {
+                    if(discountCell) discountCell.innerText = parseInt(discountCell.innerText || 10) + 5;
+                    badgeCell.innerText = 'Premium';
+                    badgeCell.className = 'badge premium';
+                } else {
+                    badgeCell.innerText = 'Regular';
+                    badgeCell.className = 'badge regular';
+                }
+            });
+        }
+
+        function switchTab(evt, tabName) {
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            const navItems = document.querySelectorAll('.nav-links li');
+            navItems.forEach(item => item.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+
+            const titles = {
+                'overview': ['Executive Inventory Dashboard', 'Smart Retail & Inventory Management Platform'],
+                'products': ['Product Catalog & Stock', 'Detailed inventory items managed via Java collections'],
+                'warehouses': ['Warehouse Distribution Hubs', 'Multi-location stock distribution reports'],
+                'customers': ['Customer Management', 'Regular and Premium membership tracking'],
+                'billing': ['Billing & GST Calculations', 'Automated tax and discount computations'],
+                'reports': ['Sales Analytics & Reports', 'Transaction logs and financial summaries']
+            };
+            document.getElementById('page-title').innerText = titles[tabName][0];
+            document.getElementById('page-subtitle').innerText = titles[tabName][1];
+        }
+
+        function addProduct() {
+            const name = document.getElementById('new-name').value;
+            const cost = parseFloat(document.getElementById('new-cost').value) || 0;
+            const gst = parseFloat(document.getElementById('new-gst').value) || 0;
+            const disc = parseFloat(document.getElementById('new-disc').value) || 0;
+            const tier = document.getElementById('new-tier').value;
+            const stock = parseInt(document.getElementById('new-stock').value) || 0;
+
+            if(!name) {
+                alert('Please enter a product name.');
+                return;
+            }
+
+            const tax = (cost * (gst / 100)).toFixed(2);
+            const table = document.getElementById('product-table').getElementsByTagName('tbody')[0];
+            const rowCount = table.rows.length + 1;
+
+            const newRow = table.insertRow();
+            newRow.innerHTML = `
+                <td>${rowCount}</td>
+                <td contenteditable="true">${name}</td>
+                <td contenteditable="true">${cost}</td>
+                <td contenteditable="true">${gst}</td>
+                <td>${tax}</td>
+                <td class="row-discount" contenteditable="true">${disc}</td>
+                <td><span class="badge ${tier.toLowerCase()}">${tier}</span></td>
+                <td contenteditable="true">${stock}</td>
+            `;
+
+            document.getElementById('new-name').value = '';
+            document.getElementById('new-cost').value = '';
+            document.getElementById('new-gst').value = '';
+            document.getElementById('new-disc').value = '';
+            document.getElementById('new-stock').value = '';
+
+            updateMetrics();
+            alert('Product added successfully!');
+        }
+
+        function updateMetrics() {
+            const table = document.getElementById('product-table').getElementsByTagName('tbody')[0];
+            let totalStock = 0;
+            let totalProducts = table.rows.length;
+
+            for (let i = 0; i < table.rows.length; i++) {
+                const stockCell = table.rows[i].cells[7];
+                totalStock += parseInt(stockCell.innerText) || 0;
+            }
+
+            document.getElementById('metric-products').innerText = totalProducts;
+            document.getElementById('metric-stock').innerText = totalStock.toLocaleString();
+            alert('Metrics recalculated successfully!');
+        }
+    </script>
+</body>
+</html>
